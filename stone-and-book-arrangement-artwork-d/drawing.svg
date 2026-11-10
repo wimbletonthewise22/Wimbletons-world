@@ -1,0 +1,33 @@
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 600'>
+<defs>
+<linearGradient id='bookGrad' x1='0%' y1='0%' x2='0%' y2='100%'>
+<stop offset='0%' stop-color='#d9b38c'/>
+<stop offset='100%' stop-color='#a57e4f'/>
+</linearGradient>
+<radialGradient id='stoneGrad' cx='50%' cy='50%' r='50%'>
+<stop offset='0%' stop-color='#3d2b2c'/>
+<stop offset='100%' stop-color='#1a1412'/>
+</radialGradient>
+</defs>
+<g transform='translate(50, 200)'>
+<path d='M0,0 L180,0 L180,300 L0,300 Z' fill='url(#bookGrad)'/>
+<text x='90' y='40' font-family='Times New Roman' font-size='25' text-anchor='middle'>Pages</text>
+<path d='M20,60 Q100,80 180,60 L180,300 L20,300 Z' fill='#ffffff'/>
+<rect x='40' y='70' width='100' height='20' rx='5' fill='#e6d9c0'/>
+<path d='M40,90 Q80,100 120,90 L120,110 C130,110 170,90 180,90 Z' fill='#b3a58c'/>
+<path d='M40,110 Q80,120 120,110 L120,130 C130,130 170,110 180,110 Z' fill='#b3a58c'/>
+<path d='M40,130 Q80,140 120,130 L120,150 C130,150 170,130 180,130 Z' fill='#b3a58c'/>
+<path d='M40,150 Q80,160 120,150 L120,170 C130,170 170,150 180,150 Z' fill='#b3a58c'/>
+<path d='M40,170 Q80,180 120,170 L120,190 C130,190 170,170 180,170 Z' fill='#b3a58c'/>
+<path d='M40,190 Q80,200 120,190 L120,210 C130,210 170,190 180,190 Z' fill='#b3a58c'/>
+<path d='M40,210 Q80,220 120,210 L120,230 C130,230 170,210 180,210 Z' fill='#b3a58c'/>
+<path d='M40,230 Q80,240 120,230 L120,250 C130,250 170,230 180,230 Z' fill='#b3a58c'/>
+<path d='M40,250 Q80,260 120,250 L120,270 C130,270 170,250 180,250 Z' fill='#b3a58c'/>
+<path d='M40,270 Q80,280 120,270 L120,290 C130,290 170,270 180,270 Z' fill='#b3a58c'/>
+<path d='M40,290 Q80,300 120,290 L120,310 C130,310 170,290 180,290 Z' fill='#b3a58c'/>
+</g>
+<g transform='translate(60, 40)'>
+<circle cx='80' cy='80' r='50' fill='url(#stoneGrad)'/>
+<path d='M70,120 L90,130 L100,120 Z' fill='#c6a27d'/>
+</g>
+</svg>

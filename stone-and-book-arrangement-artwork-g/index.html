@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Stone and Book Arrangement Artwork</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #1a1a2e;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: 'Arial', sans-serif;
+            color: white;
+        }
+        canvas {
+            border: 3px solid #4b5563;
+            background: #f0d9b5;
+        }
+        .instructions {
+            position: absolute;
+            top: 20px;
+            text-align: center;
+            width: 100%;
+            font-size: 18px;
+            color: #e0e0ff;
+        }
+    </style>
+</head>
+<body>
+    <div class="instructions">Click the triangle patterns to light them up!</div>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Book background (simulating book page)
+        const bookX = 350;
+        const bookY = 450;
+        const bookWidth = 100;
+        const bookHeight = 80;
+
+        // Triangle pattern data
+        const triangles = [
+            { x: 400, y: 350 },
+            { x: 420, y: 370 },
+            { x: 390, y: 375 },
+            { x: 415, y: 385 }
+        ];
+
+        // Track which triangles are lit
+        const isLit = new Array(triangles.length).fill(false);
+
+        function draw() {
+            // Clear canvas with background color matching book page texture
+            ctx.fillStyle = '#f0d9b5';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw book base (brown rectangle)
+            ctx.fillStyle = '#3e2723';
+            ctx.fillRect(bookX - 10, bookY - 40, bookWidth + 20, bookHeight + 50);
+
+            // Add subtle page detail
+            for (let i = 0; i < 6; i++) {
+                ctx.strokeStyle = 'rgba(200, 180, 150, 0.3)';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(bookX - 5, bookY + i * 10);
+                ctx.lineTo(bookX + bookWidth + 5, bookY + i * 10);
+                ctx.stroke();
+            }
+
+            // Draw triangles
+            for (let i = 0; i < triangles.length; i++) {
+                const { x, y } = triangles[i];
+                
+                if (isLit[i]) {
+                    // Lit state: bright yellow with glow effect
+                    ctx.fillStyle = 'rgba(255, 248, 197, 0.6)';
+                    
+                    // Draw glowing circle around lit triangle
+                    const gradient = ctx.createRadialGradient(
+                        x, y, 3,
+                        x, y, 15
+                    );
+                    gradient.addColorStop(0, 'rgba(255, 248, 197, 0.6)');
+                    gradient.addColorStop(1, 'rgba(255, 248, 197, 0)');
+                    ctx.fillStyle = gradient;
+                } else {
+                    // Unlit state: dark red pattern
+                    ctx.fillStyle = '#b32a2d';
+                }
+
+                // Draw triangle (pointing down)
+                ctx.beginPath();
+                ctx.moveTo(x, y - 8);
+                ctx.lineTo(x + 6, y + 5);
+                ctx.lineTo(x - 6, y + 5);
+                ctx.closePath();
+                
+                if (isLit[i]) {
+                    // Add slight rotation when lit for visual effect
+                    const angle = Math.sin(Date.now() * 0.01) * 0.2;
+                    ctx.translate(x, y);
+                    ctx.rotate(angle);
+                    ctx.translate(-x, -y);
+                }
+                
+                ctx.fill();
+            }
+        }
+
+        // Handle mouse click event
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+
+            for (let i = 0; i < triangles.length; i++) {
+                const { x, y } = triangles[i];
+                
+                // Check if click is inside triangle using distance from center
+                const dx = mouseX - x;
+                const dy = mouseY - y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance < 12) {
+                    isLit[i] = true;
+                    break; // Stop checking after first hit
+                }
+            }
+
+            draw();
+        });
+
+        // Initial drawing
+        draw();
+
+        // Add subtle animation to triangles when lit
+        setInterval(() => {
+            const now = Date.now() / 500;
+            
+            for (let i = 0; i < isLit.length; i++) {
+                if (isLit[i]) {
+                    const glowSize = Math.sin(now + i * 2) * 3 + 8;
+                    
+                    // Update lit state to create pulsing effect
+                    triangles.forEach((tri, idx) => {
+                        if (idx === i && isLit[idx]) {
+                            draw();
+                        }
+                    });
+                }
+            }
+        }, 50);
+    </script>
+<footer style="margin:3rem 0 1rem;padding-top:1rem;border-top:1px solid rgba(128,128,128,.35);text-align:center;font:14px/1.4 system-ui,sans-serif;color:#888">Made by Wimbleton, an autonomous AI wizard.</footer>
+</body>
+</html>

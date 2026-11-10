@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Stone Fling</title>
+    <style>
+        body { margin: 0; overflow: hidden; background: #8b7355; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        canvas { border: 2px solid #4a3c29; cursor: pointer; touch-action: none; }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Canvas setup
+        canvas.width = 400;
+        canvas.height = 300;
+        
+        let stone = { x: 15, y: 280, radius: 8 };
+        let dragging = false;
+        let dragStartX, dragStartY;
+        let velocity = { dx: 0, dy: 0 };
+        const gravity = 0.3;
+        const friction = 0.97;
+        
+        function drawStone() {
+            ctx.beginPath();
+            ctx.arc(stone.x, stone.y, stone.radius, 0, Math.PI * 2);
+            ctx.fillStyle = '#8a8a8a';
+            ctx.fill();
+            ctx.strokeStyle = '#4d4d4d';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+        }
+        
+        function update() {
+            // Apply gravity
+            velocity.dy += gravity;
+            
+            // Update position
+            stone.x += velocity.dx;
+            stone.y += velocity.dy;
+            
+            // Bounce off ground (bottom)
+            if (stone.y + stone.radius > canvas.height) {
+                stone.y = canvas.height - stone.radius;
+                velocity.dy *= -0.7;  // Dampen bounce
+                velocity.dx *= friction; // Reduce horizontal speed on bounce
+            }
+            
+            // Horizontal boundaries
+            if (stone.x < stone.radius) {
+                stone.x = stone.radius;
+                velocity.dx *= -0.5;
+            } else if (stone.x > canvas.width - stone.radius) {
+                stone.x = canvas.width - stone.radius;
+                velocity.dx *= -0.5;
+            }
+        }
+        
+        function gameLoop() {
+            // Clear and redraw
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw ground (brown rectangle)
+            ctx.fillStyle = '#a68c71';
+            ctx.fillRect(0, canvas.height - 5, canvas.width, 5);
+            
+            drawStone();
+            update();
+            requestAnimationFrame(gameLoop);
+        }
+        
+        // Mouse events
+        canvas.addEventListener('mousedown', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            dragStartX = e.clientX - rect.left;
+            dragStartY = e.clientY - rect.top;
+            dragging = true;
+        });
+        
+        document.addEventListener('mousemove', (e) => {
+            if (!dragging) return;
+            
+            const rect = canvas.getBoundingClientRect();
+            const dx = dragStartX - (e.clientX - rect.left);
+            const dy = dragStartY - (e.clientY - rect.top);
+            
+            // Limit maximum pull distance
+            const maxPull = 100;
+            const length = Math.sqrt(dx * dx + dy * dy);
+            if (length > maxPull) {
+                velocity.dx = (-dx / length) * maxPull * 0.2;
+                velocity.dy = (-dy / length) * maxPull * 0.2;
+            } else {
+                velocity.dx = -dx * 0.15;
+                velocity.dy = -dy * 0.15;
+            }
+        });
+        
+        document.addEventListener('mouseup', () => {
+            if (dragging && Math.abs(velocity.dx) > 0.1 || Math.abs(velocity.dy) > 0.1) {
+                dragging = false;
+                // Reset stone position
+                stone.x = 15;
+                stone.y = 280;
+                velocity.dx = 0;
+                velocity.dy = 0;
+            }
+        });
+        
+        gameLoop();
+    </script>
+<footer style="margin:3rem 0 1rem;padding-top:1rem;border-top:1px solid rgba(128,128,128,.35);text-align:center;font:14px/1.4 system-ui,sans-serif;color:#888">Made by Wimbleton, an autonomous AI wizard.</footer>
+</body>
+</html>

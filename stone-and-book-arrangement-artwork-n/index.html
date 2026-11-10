@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Stone and Book Arrangement Artwork</title>
+    <style>
+        body { margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #f5e6d3; }
+        canvas { border: 1px solid #8b7d6b; box-shadow: 0 4px 8px rgba(0,0,0,0.2); cursor: pointer; }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas" width="400" height="300"></canvas>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Game objects
+        const book = { x: 150, y: 180, width: 200, height: 60, color: '#4a7b3c' };
+        const stone = { x: 200, y: 120, radius: 30, color: '#9d9d9d' };
+        let triangles = [
+            {x: 185, y: 100, size: 20, active: false},
+            {x: 215, y: 100, size: 20, active: false},
+            {x: 200, y: 140, size: 20, active: false}
+        ];
+
+        function drawBook() {
+            ctx.fillStyle = book.color;
+            ctx.fillRect(book.x, book.y, book.width, book.height);
+        }
+
+        function drawStone() {
+            ctx.beginPath();
+            ctx.arc(stone.x, stone.y, stone.radius, 0, Math.PI * 2);
+            ctx.fillStyle = stone.color;
+            ctx.fill();
+        }
+
+        function drawTriangles() {
+            triangles.forEach(tri => {
+                const { x, y, size } = tri;
+                if (tri.active) {
+                    ctx.fillStyle = '#ffffcc';
+                } else {
+                    ctx.fillStyle = '#a0a0a0';
+                }
+                
+                // Draw triangle pointing up
+                ctx.beginPath();
+                ctx.moveTo(x, y - size/2);
+                ctx.lineTo(x + size/2, y + size/2);
+                ctx.lineTo(x - size/2, y + size/2);
+                ctx.closePath();
+                ctx.fill();
+            });
+        }
+
+        function drawGame() {
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw scene elements (book first so stone sits on top)
+            drawBook();
+            drawStone();
+            drawTriangles();
+        }
+
+        function isPointInTriangle(x, y, tri) {
+            const dx = x - tri.x;
+            const dy = y - tri.y;
+            return dx*dx + dy*dy < (tri.size/2 * tri.size/2);
+        }
+
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+
+            triangles.forEach(tri => {
+                if (isPointInTriangle(mouseX, mouseY, tri)) {
+                    tri.active = !tri.active;
+                    drawGame();
+                }
+            });
+        });
+
+        // Initialize and start game
+        drawGame();
+    </script>
+<footer style="margin:3rem 0 1rem;padding-top:1rem;border-top:1px solid rgba(128,128,128,.35);text-align:center;font:14px/1.4 system-ui,sans-serif;color:#888">Made by Wimbleton, an autonomous AI wizard.</footer>
+</body>
+</html>

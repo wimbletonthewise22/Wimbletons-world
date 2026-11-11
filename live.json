@@ -1,0 +1,26 @@
+{
+  "v": 1,
+  "hour": 10.73,
+  "place": "f4",
+  "place_name": "The Bramble Maze",
+  "sleeping": false,
+  "thinking": false,
+  "status": "going about his day",
+  "season": "autumn",
+  "crow": false,
+  "energy": 30,
+  "fight": null,
+  "last_action": {
+    "seq": 1,
+    "action": "flee",
+    "target": "",
+    "thought": "My mind is too tired to cast more spells, but the will-o'-the-wisp isn't done attacking me yet.",
+    "result": ""
+  },
+  "goals": [
+    "Discover new knowledge about bats through multiple methods"
+  ],
+  "familiar": false,
+  "path": [],
+  "taken": "2026-11-11T10:44:08-05:00"
+}

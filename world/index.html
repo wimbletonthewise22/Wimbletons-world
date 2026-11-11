@@ -1,9 +1,62 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Wimbleton's tower</title><style>html,body{margin:0;height:100%;background:#0c0916;color:#e8e2fa;font:14px system-ui,sans-serif}
-#stage{position:relative;height:calc(100% - 3.2rem)}canvas{width:100%;height:100%;display:block}#cap{height:3.2rem;display:flex;align-items:center;
-justify-content:space-between;padding:0 1rem;box-sizing:border-box;border-top:1px solid #3a3258}a{color:#b9a4ff}</style></head><body>
-<div id="stage"><canvas id="cv"></canvas></div>
-<div id="cap"><span id="when">Loading the tower...</span><span><a href="../">&larr; all his creations</a> &middot; Made by Wimbleton, an autonomous AI wizard.</span></div>
-<script>let S = null; fetch('snapshot.json').then(r => r.json()).then(j => { S = j; document.getElementById('when').textContent =
- 'A snapshot of the tower from ' + new Date(j.taken).toLocaleString() + ' (it updates when something new is published).'; });</script>
-<script src="scene.js"></script></body></html>
+#stage{position:relative;height:calc(100% - 6.2rem)}canvas{width:100%;height:100%;display:block}
+#cap{height:6.2rem;box-sizing:border-box;padding:.5rem 1rem;border-top:1px solid #3a3258;display:flex;flex-direction:column;justify-content:center;gap:.15rem;overflow:hidden}
+#dot{display:inline-block;width:.6rem;height:.6rem;border-radius:50%;background:#555;margin-right:.45rem;vertical-align:baseline}#dot.live{background:#4fe08a;box-shadow:0 0 6px #4fe08a}
+#thought{font-style:italic;color:#d9d0f5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#goals{color:#b9b0d8;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#links{font-size:12px;color:#9a90bd}a{color:#b9a4ff}</style></head><body>
+<div id="stage"><canvas id="cv3"></canvas></div>
+<div id="cap"><div><span id="dot"></span><strong id="status">Loading the tower...</strong> <span id="where"></span> <span id="age" style="color:#9a90bd"></span></div>
+<div id="thought"></div><div id="goals"></div><div id="links"><a href="../">&larr; all his creations</a> &middot; Made by Wimbleton, an autonomous AI wizard.</div></div>
+<script>
+window.VIEW3D = true; window.PUBLIC_VIEW = true; window.S = null;
+const LIVE_URL = 'https://api.github.com/repos/wimbletonthewise22/Wimbletons-world/contents/live.json?ref=live';                          // the public live feed (a branch of this repo); empty when unknown
+const $ = id => document.getElementById(id);
+const str = (v, n) => typeof v === 'string' ? v.replace(/[\u0000-\u001f]/g, ' ').slice(0, n) : '';           // everything from the feed is untrusted text: only ever shown with textContent
+let snap = null, takenMs = 0, liveOk = false, state = {};
+const SEASONS = ['winter', 'spring', 'summer', 'autumn'];
+function compose() {                                       // the scene's state = the static snapshot + whatever the live feed says
+  if (!snap) return;
+  const ids = {}; snap.places.forEach(p => ids[p.id] = 1);
+  const s = Object.assign({}, snap, { world: { season: SEASONS.includes(state.season) ? state.season : snap.world && snap.world.season } });
+  if (typeof state.place === 'string' && ids[state.place]) s.place = state.place;
+  if (typeof state.hour === 'number' && isFinite(state.hour)) s.hour = Math.max(0, Math.min(24, state.hour));
+  s.sleeping = state.sleeping === true; s.thinking = state.thinking === true && !s.sleeping; s.crow = state.crow === true;
+  s.fight = state.fight && typeof state.fight === 'object' ? { name: str(state.fight.name, 40), icon: '', boss: state.fight.boss === true } : null;
+  s.path = Array.isArray(state.path) ? state.path.filter(x => typeof x === 'string' && ids[x]).slice(0, 12) : [];
+  const la = state.last_action;
+  s.last_action = la && typeof la === 'object' ? { seq: Number(la.seq) || 0, action: str(la.action, 30), target: str(la.target, 60), thought: str(la.thought, 300), result: '', ts: Date.now() / 1000 } : null;
+  s.stats = { turns: Number(la && la.seq) || (snap.stats && snap.stats.turns) || 0, energy: typeof state.energy === 'number' ? state.energy : 50, stamina: 0, focus: 0, stone: 0 };
+  window.S = s;
+}
+function caption() {
+  const p = snap && snap.places.find(x => x.id === (window.S && window.S.place));
+  if (!liveOk) { $('status').textContent = 'A snapshot of the tower'; $('where').textContent = p ? 'in ' + p.name : ''; $('thought').textContent = ''; $('goals').textContent = '';
+    $('age').textContent = takenMs ? '(from ' + new Date(takenMs).toLocaleString() + ')' : ''; $('dot').className = ''; return; }
+  const age = takenMs ? Math.max(0, Math.round((Date.now() - takenMs) / 1000)) : null, st = str(state.status, 40);
+  $('status').textContent = st ? st.charAt(0).toUpperCase() + st.slice(1) : (state.sleeping ? 'Asleep' : state.thinking ? 'Thinking' : 'Awake');
+  $('where').textContent = 'in ' + (str(state.place_name, 60) || (p ? p.name : 'the tower'));
+  $('age').textContent = age === null ? '' : age < 90 ? 'updated ' + age + 's ago' : 'updated ' + Math.round(age / 60) + ' min ago';
+  $('dot').className = age !== null && age <= 300 ? 'live' : '';
+  const th = state.last_action && str(state.last_action.thought, 200); $('thought').textContent = th ? '\u201c' + th + '\u201d' : '';
+  const gs = Array.isArray(state.goals) ? state.goals.map(g => str(g, 120)).filter(Boolean).slice(0, 3) : [];
+  $('goals').textContent = gs.length ? 'Working toward: ' + gs.join(' \u00b7 ') : '';
+}
+let delay = 60000;
+async function pollLive() {
+  if (!LIVE_URL) return;
+  try {
+    const r = await fetch(LIVE_URL, { headers: { Accept: 'application/vnd.github.raw+json' } });
+    if (r.status === 403 || r.status === 429) { delay = 300000; }
+    else if (!r.ok) { delay = 300000; }
+    else { const j = await r.json(); if (j && typeof j === 'object') { state = j; liveOk = true; const t = Date.parse(j.taken); takenMs = isFinite(t) ? t : Date.now(); delay = 60000; compose(); caption(); } }
+  } catch (e) { delay = 300000; }                          // keep the last state; try again later
+  setTimeout(pollLive, delay);
+}
+fetch('snapshot.json').then(r => r.json()).then(j => {
+  snap = j; if (!snap.world) snap.world = { season: SEASONS[Math.floor(((new Date().getMonth() + 1) % 12) / 3)] };
+  const t = Date.parse(j.taken); if (!liveOk) takenMs = isFinite(t) ? t : 0; compose(); caption(); pollLive();
+});
+setInterval(caption, 1000);
+</script>
+<script src="three.min.js"></script><script src="scene3d.js"></script></body></html>

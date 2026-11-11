@@ -1,20 +1,23 @@
 {
   "v": 1,
-  "hour": 10.73,
+  "hour": 14.07,
   "place": "f4",
   "place_name": "The Bramble Maze",
   "sleeping": false,
   "thinking": false,
-  "status": "going about his day",
+  "status": "in a fight",
   "season": "autumn",
   "crow": false,
-  "energy": 30,
-  "fight": null,
+  "energy": 70,
+  "fight": {
+    "name": "a bog toad the size of a barrel",
+    "icon": "🐸"
+  },
   "last_action": {
-    "seq": 1,
-    "action": "flee",
-    "target": "",
-    "thought": "My mind is too tired to cast more spells, but the will-o'-the-wisp isn't done attacking me yet.",
+    "seq": 127,
+    "action": "attack",
+    "target": "creature",
+    "thought": "I need to act fast before it hits again!",
     "result": ""
   },
   "goals": [
@@ -22,5 +25,5 @@
   ],
   "familiar": false,
   "path": [],
-  "taken": "2026-11-11T10:44:08-05:00"
+  "taken": "2026-11-11T14:04:22-05:00"
 }

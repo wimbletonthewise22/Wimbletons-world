@@ -883,7 +883,7 @@ function autoQuality(now, busy) {
   if (lastRender) { ft.push(now - lastRender); if (ft.length > 90) ft.shift(); }
   if (now - evalAt < 3000 || ft.length < 45) return; evalAt = now;
   const avg = ft.reduce((a, b) => a + b, 0) / ft.length;
-  if (avg > 42 && Q.level < 5) { applyQuality(Q.level + 1); penalty = now; goodSince = now; ft.length = 0; }
+  if (avg > 42 && Q.level < 3) { applyQuality(Q.level + 1); penalty = now; goodSince = now; ft.length = 0; }
   else if (avg < 35) { if (!goodSince) goodSince = now; if (now - goodSince > 45000 && now - penalty > 120000 && Q.level > 0) { applyQuality(Q.level - 1); goodSince = now; ft.length = 0; } }
   else goodSince = now;
 }
